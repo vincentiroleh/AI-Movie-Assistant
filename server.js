@@ -148,10 +148,28 @@ app.post("/recommend", async (req, res) => {
     const prefs = { ...DEFAULT_PREFS, ...(req.body?.prefs || {}) };
     const limit = Math.min(Number(req.body?.limit) || 5, 10);
     const movies = await fetchMovies(prefs);
-    const picks = await explainChoices(prefs, movies, limit);
+    const reasons = await explainChoices(prefs, movies, limit);
+    const normalizeTitle = value => (value || "").toLowerCase();
+    const findMovie = movieTitle => {
+      if (!movieTitle) return null;
+      const needle = normalizeTitle(movieTitle);
+      return movies.find(movie => normalizeTitle(movie.title) === needle);
+    };
+
+    const picks = (reasons.picks || []).map(pick => {
+      const match = findMovie(pick.title);
+      return {
+        title: pick.title,
+        why: pick.why,
+        poster: match?.poster || null,
+        year: match?.year || null,
+        genres: match?.genres || [],
+        overview: match?.overview || ""
+      };
+    });
 
     res.json({
-      picks: picks.picks || [],
+      picks,
       prefs,
       disclaimer: "For entertainment purposes."
     });
