@@ -3,6 +3,8 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 
 dotenv.config();
@@ -15,8 +17,12 @@ if (missingKeys.length && !MOCK_MODE) {
   throw new Error(`Missing .env values: ${missingKeys.join(", ")}`);
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 const DEFAULT_PREFS = {
   genres: ["sci-fi", "thriller"],

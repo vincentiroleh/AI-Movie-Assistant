@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mini Movie Matchmaker</title>
+    <style>
+      :root {
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at 10% 20%, #181f49, #080812 60%);
+        color: #f9fbff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 12px 48px;
+      }
+
+      main {
+        width: min(1100px, 100%);
+        background: rgba(12, 16, 33, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 28px;
+        padding: 36px clamp(20px, 4vw, 48px) 48px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(18px);
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 32px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+      }
+
+      header p {
+        margin: 0;
+        color: #b8c3f1;
+      }
+
+      .layout {
+        display: grid;
+        gap: 32px;
+      }
+
+      @media (min-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr 1.1fr;
+          gap: 40px;
+        }
+      }
+
+      form {
+        display: grid;
+        gap: 18px;
+        padding: 24px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      fieldset {
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 12px;
+      }
+
+      legend,
+      label {
+        font-weight: 600;
+        color: #f1f4ff;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chip {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.92rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+      }
+
+      .chip input {
+        accent-color: #52f2ff;
+      }
+
+      .chip:has(input:checked) {
+        background: rgba(82, 242, 255, 0.18);
+        border-color: rgba(82, 242, 255, 0.8);
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="range"],
+      select,
+      textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(5, 8, 33, 0.65);
+        padding: 11px 14px;
+        color: inherit;
+        font: inherit;
+      }
+
+      input[type="range"] {
+        padding: 0;
+      }
+
+      .range-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        color: #b8c3f1;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 14px 24px;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: linear-gradient(120deg, #ff5fd7, #5b8dff, #52f2ff);
+        color: #0c1021;
+        cursor: pointer;
+        font-weight: 700;
+        transition: transform 0.15s ease;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      button:not(:disabled):hover {
+        transform: translateY(-1px) scale(1.01);
+      }
+
+      .status {
+        min-height: 24px;
+        font-size: 0.95rem;
+        color: #bce4ff;
+      }
+
+      .cards {
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .card h3 {
+        margin: 0 0 6px;
+      }
+
+      .card p {
+        margin: 0;
+        color: #b8c3f1;
+      }
+
+      .empty {
+        padding: 32px;
+        text-align: center;
+        color: #b8c3f1;
+        border: 1px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+      }
+
+      .footer-note {
+        margin-top: 24px;
+        font-size: 0.9rem;
+        color: #6d769c;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Mini Movie Matchmaker 🍿</h1>
+          <p>
+            Dial in a mood, give the assistant a vibe check, and let the AI pick tonight's feature.
+          </p>
+        </div>
+        <button id="demo-btn" type="button">Feel Lucky</button>
+      </header>
+
+      <div class="layout">
+        <form id="pref-form">
+          <fieldset>
+            <label for="mood">Mood / vibe</label>
+            <input id="mood" name="mood" type="text" placeholder="eg. Need something clever with a heart" value="mind-bending but not too dark" />
+          </fieldset>
+
+          <fieldset>
+            <legend>Must-have genres</legend>
+            <div class="chip-row">
+              <label class="chip"><input type="checkbox" name="genres" value="sci-fi" checked /> Sci-Fi</label>
+              <label class="chip"><input type="checkbox" name="genres" value="thriller" checked /> Thriller</label>
+              <label class="chip"><input type="checkbox" name="genres" value="adventure" /> Adventure</label>
+              <label class="chip"><input type="checkbox" name="genres" value="comedy" /> Comedy</label>
+              <label class="chip"><input type="checkbox" name="genres" value="drama" /> Drama</label>
+              <label class="chip"><input type="checkbox" name="genres" value="romance" /> Romance</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Hard pass on</legend>
+            <div class="chip-row">
+              <label class="chip"><input type="checkbox" name="avoid" value="horror" checked /> Horror</label>
+              <label class="chip"><input type="checkbox" name="avoid" value="drama" /> Drama overload</label>
+              <label class="chip"><input type="checkbox" name="avoid" value="comedy" /> Goofy slapstick</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <label>Release window</label>
+            <div class="chip-row">
+              <input type="number" name="yearFrom" min="1960" max="2025" value="2005" />
+              <span style="padding-top: 10px; color: #6d769c">to</span>
+              <input type="number" name="yearTo" min="1965" max="2030" value="2025" />
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <label for="language">Original language</label>
+            <select id="language" name="language">
+              <option value="en" selected>English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="ja">Japanese</option>
+              <option value="ko">Korean</option>
+            </select>
+          </fieldset>
+
+          <fieldset>
+            <label for="limit">How many picks?</label>
+            <div class="range-label">
+              <span>1</span>
+              <span id="limit-label">5</span>
+              <span>10</span>
+            </div>
+            <input type="range" min="1" max="10" value="5" id="limit" name="limit" />
+          </fieldset>
+
+          <button type="submit" id="submit-btn">Serve the lineup</button>
+          <div class="status" id="status">Powered by TMDB + Bedrock</div>
+        </form>
+
+        <section>
+          <h2 style="margin-top: 0">Your personalized watchlist</h2>
+          <div id="results" class="cards">
+            <div class="empty">Dial up some prefs on the left and let the picks roll in ✨</div>
+          </div>
+          <p class="footer-note" id="disclaimer"></p>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("pref-form");
+      const results = document.getElementById("results");
+      const disclaimer = document.getElementById("disclaimer");
+      const status = document.getElementById("status");
+      const limit = document.getElementById("limit");
+      const limitLabel = document.getElementById("limit-label");
+      const submitBtn = document.getElementById("submit-btn");
+      const demoBtn = document.getElementById("demo-btn");
+
+      limit.addEventListener("input", () => {
+        limitLabel.textContent = limit.value;
+      });
+
+      demoBtn.addEventListener("click", () => {
+        const vibes = [
+          "Need something clever with a jaw-drop twist",
+          "Feel-good adventure with zero horror",
+          "Trippy sci-fi but grounded characters",
+          "Slow-burn mystery full of atmosphere"
+        ];
+        document.getElementById("mood").value = vibes[Math.floor(Math.random() * vibes.length)];
+        limit.value = Math.ceil(Math.random() * 5) + 3;
+        limit.dispatchEvent(new Event("input"));
+        form.dispatchEvent(new Event("submit", { cancelable: true }));
+      });
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        fetchRecommendations();
+      });
+
+      function collectPrefs() {
+        const data = new FormData(form);
+        const getList = name => data.getAll(name).filter(Boolean);
+        const yearFrom = Number(data.get("yearFrom")) || 2005;
+        const yearTo = Number(data.get("yearTo")) || 2025;
+
+        return {
+          mood: data.get("mood") || "Mind-bending but not too dark",
+          genres: getList("genres"),
+          avoid: getList("avoid"),
+          language: data.get("language") || "en",
+          yearRange: [Math.min(yearFrom, yearTo), Math.max(yearFrom, yearTo)]
+        };
+      }
+
+      async function fetchRecommendations() {
+        setLoading(true);
+        setStatus("Mixing your cinematic cocktail...");
+
+        try {
+          const prefs = collectPrefs();
+          const response = await fetch("/recommend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prefs, limit: Number(limit.value) })
+          });
+
+          if (!response.ok) {
+            throw new Error("Something went sideways. Try tweaking your vibe.");
+          }
+
+          const payload = await response.json();
+          renderPicks(payload.picks);
+          disclaimer.textContent = payload.disclaimer || "For entertainment purposes.";
+          setStatus("Here you go!", "success");
+        } catch (error) {
+          renderError(error.message);
+          setStatus(error.message, "error");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function renderPicks(picks = []) {
+        if (!picks.length) {
+          results.innerHTML = '<div class="empty">No picks yet. Try a different combo.</div>';
+          return;
+        }
+
+        results.innerHTML = picks
+          .map(
+            pick => `
+            <article class="card">
+              <h3>${pick.title || "Untitled"}</h3>
+              <p>${pick.why || "Trust the vibes."}</p>
+            </article>
+          `
+          )
+          .join("");
+      }
+
+      function renderError(message) {
+        results.innerHTML = `<div class="empty">${message}</div>`;
+      }
+
+      function setStatus(message, tone = "info") {
+        status.textContent = message;
+        status.style.color = tone === "error" ? "#ff9ca5" : tone === "success" ? "#52f2ff" : "#bce4ff";
+      }
+
+      function setLoading(isLoading) {
+        submitBtn.disabled = isLoading;
+        submitBtn.textContent = isLoading ? "Crunching..." : "Serve the lineup";
+      }
+    </script>
+  </body>
+</html>
